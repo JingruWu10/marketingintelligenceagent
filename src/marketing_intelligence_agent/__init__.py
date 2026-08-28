@@ -1,4 +1,10 @@
 from .agent import MarketingIntelligenceAgent
-from .models import BusinessContext, KPIObservation
+from .models import AIAnalysisOutput, AISynthesis, BusinessContext, KPIObservation
 
-__all__ = ["MarketingIntelligenceAgent", "BusinessContext", "KPIObservation"]
+__all__ = [
+    "MarketingIntelligenceAgent",
+    "BusinessContext",
+    "KPIObservation",
+    "AISynthesis",
+    "AIAnalysisOutput",
+]
