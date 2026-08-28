@@ -1,9 +1,13 @@
 [project]
 name = "marketing-intelligence-agent"
-version = "0.1.0"
+version = "0.2.0"
 description = "AI-assisted marketing analytics decision partner"
 requires-python = ">=3.10"
-dependencies = ["pydantic>=2.7", "pandas>=2.0"]
+dependencies = [
+  "pydantic>=2.7",
+  "pandas>=2.0",
+  "openai>=1.54.0",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
