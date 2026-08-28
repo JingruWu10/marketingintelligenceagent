@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import Iterable
 
+from .llm.base import SynthesisProvider
 from .models import (
+    AIAnalysisOutput,
     AnalysisOutput,
     BusinessContext,
     EvidenceItem,
@@ -15,9 +17,9 @@ from .rules import detect_signals, generate_hypotheses, segment_spread
 class MarketingIntelligenceAgent:
     """Decision-partner prototype.
 
-    This class deliberately separates deterministic analytical guardrails from any LLM layer.
-    An LLM can later be added for synthesis, query generation, and hypothesis expansion, while
-    validation logic and metric definitions remain explicit and testable.
+    Deterministic analytics own metric interpretation and guardrails. An optional LLM
+    collaboration layer can broaden synthesis and hypothesis framing, but it receives the
+    deterministic output as its evidence boundary and does not replace validation.
     """
 
     def analyze(self, context: BusinessContext, observations: Iterable[KPIObservation]) -> AnalysisOutput:
@@ -49,9 +51,7 @@ class MarketingIntelligenceAgent:
         )
 
         evidence = [EvidenceItem(label="observed", text=s) for s in signals]
-        evidence.extend(
-            EvidenceItem(label="inferred", text=h.statement) for h in hypotheses
-        )
+        evidence.extend(EvidenceItem(label="inferred", text=h.statement) for h in hypotheses)
         evidence.append(
             EvidenceItem(
                 label="recommended",
@@ -67,3 +67,13 @@ class MarketingIntelligenceAgent:
             recommendation=recommendation,
             evidence=evidence,
         )
+
+    def analyze_with_ai(
+        self,
+        context: BusinessContext,
+        observations: Iterable[KPIObservation],
+        provider: SynthesisProvider,
+    ) -> AIAnalysisOutput:
+        deterministic = self.analyze(context, observations)
+        ai_synthesis = provider.synthesize(context, deterministic)
+        return AIAnalysisOutput(deterministic=deterministic, ai_synthesis=ai_synthesis)
