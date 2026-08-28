@@ -51,3 +51,22 @@ class AnalysisOutput(BaseModel):
     what_to_check_next: List[str]
     recommendation: Recommendation
     evidence: List[EvidenceItem]
+
+
+class AISynthesis(BaseModel):
+    """Structured output from the LLM collaboration layer."""
+
+    executive_summary: str
+    observed: List[str]
+    inferred: List[str]
+    unknown: List[str]
+    recommended: List[str]
+    next_analysis: List[str]
+    confidence: Literal["low", "medium", "high"]
+
+
+class AIAnalysisOutput(BaseModel):
+    """Deterministic analytics plus a separately auditable AI synthesis."""
+
+    deterministic: AnalysisOutput
+    ai_synthesis: AISynthesis
