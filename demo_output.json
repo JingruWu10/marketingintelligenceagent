@@ -1,0 +1,79 @@
+{
+  "what_changed": [
+    "purchase_conversion_rate decreased 19.2% for segment=all",
+    "pdp_visits increased 20.0% for segment=new_users",
+    "purchase_conversion_rate decreased 26.3% for segment=new_users",
+    "purchase_conversion_rate varies materially by segment; aggregate performance may hide different customer states.",
+    "pdp_visits varies materially by segment; aggregate performance may hide different customer states."
+  ],
+  "hypotheses": [
+    {
+      "statement": "The primary issue is likely funnel progression rather than demand volume.",
+      "confidence": "high",
+      "evidence_needed": [
+        "step-level funnel conversion",
+        "segment mix",
+        "experience/error telemetry"
+      ]
+    },
+    {
+      "statement": "Interest may be increasing without successful progression to purchase.",
+      "confidence": "medium",
+      "evidence_needed": [
+        "add-to-cart progression",
+        "checkout friction",
+        "inventory/price context"
+      ]
+    }
+  ],
+  "where_in_journey": "Unknown - infer only after segmenting the observed behavior.",
+  "what_to_check_next": [
+    "step-level funnel conversion",
+    "segment mix",
+    "experience/error telemetry",
+    "add-to-cart progression",
+    "checkout friction",
+    "inventory/price context"
+  ],
+  "recommendation": {
+    "action": "Validate the highest-confidence hypothesis with the smallest discriminating analysis before changing campaign or product strategy.",
+    "owner": "Analytics + relevant business owner",
+    "primary_kpi": "next-stage progression rate",
+    "leading_indicator": "validated leading behavior",
+    "guardrail": "customer experience / data-quality guardrail"
+  },
+  "evidence": [
+    {
+      "label": "observed",
+      "text": "purchase_conversion_rate decreased 19.2% for segment=all"
+    },
+    {
+      "label": "observed",
+      "text": "pdp_visits increased 20.0% for segment=new_users"
+    },
+    {
+      "label": "observed",
+      "text": "purchase_conversion_rate decreased 26.3% for segment=new_users"
+    },
+    {
+      "label": "observed",
+      "text": "purchase_conversion_rate varies materially by segment; aggregate performance may hide different customer states."
+    },
+    {
+      "label": "observed",
+      "text": "pdp_visits varies materially by segment; aggregate performance may hide different customer states."
+    },
+    {
+      "label": "inferred",
+      "text": "The primary issue is likely funnel progression rather than demand volume."
+    },
+    {
+      "label": "inferred",
+      "text": "Interest may be increasing without successful progression to purchase."
+    },
+    {
+      "label": "recommended",
+      "text": "Do not jump from aggregate KPI change directly to a campaign recommendation."
+    }
+  ]
+}

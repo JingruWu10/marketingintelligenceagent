@@ -1,0 +1,7 @@
+metric,current,prior,segment,channel
+sessions,100000,99000,all,web
+purchase_conversion_rate,0.021,0.026,all,web
+pdp_visits,42000,35000,new_users,organic
+purchase_conversion_rate,0.014,0.019,new_users,organic
+pdp_visits,30000,29500,returning_users,email
+purchase_conversion_rate,0.031,0.032,returning_users,email
