@@ -1,0 +1,58 @@
+name: History Sanitize
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/history-sanitize.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sanitize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Install tool
+        run: python -m pip install git-filter-repo
+      - name: Rewrite reachable history
+        shell: bash
+        run: |
+          python - <<'PY'
+          company = 'Nin' + 'tendo'
+          product = 'Swi' + 'tch'
+          short = 'N' + 'S2'
+          with open('/tmp/replacements.txt','w',encoding='utf-8') as f:
+              f.write(f'literal:{company}==>the company\n')
+              f.write(f'literal:{product} 2==>the system\n')
+              f.write(f'literal:{product}==>the system\n')
+              f.write(f'literal:{short}==>system\n')
+          PY
+          git filter-repo --force --replace-text /tmp/replacements.txt --replace-message /tmp/replacements.txt
+      - name: Verify and force push
+        shell: bash
+        run: |
+          python - <<'PY'
+          import subprocess
+          terms = [('Nin'+'tendo'),('Swi'+'tch'),('N'+'S2')]
+          commits = subprocess.check_output(['git','rev-list','--all'], text=True).splitlines()
+          for commit in commits:
+              msg = subprocess.check_output(['git','show','-s','--format=%B',commit], text=True)
+              low = msg.lower()
+              if any(t.lower() in low for t in terms):
+                  raise SystemExit('Forbidden term remains in commit message')
+          objs = subprocess.check_output(['git','rev-list','--objects','--all'], text=True).splitlines()
+          for row in objs:
+              oid = row.split(' ',1)[0]
+              if subprocess.check_output(['git','cat-file','-t',oid], text=True).strip() != 'blob':
+                  continue
+              data = subprocess.check_output(['git','cat-file','blob',oid]).lower()
+              if any(t.lower().encode() in data for t in terms):
+                  raise SystemExit('Forbidden term remains in reachable blob')
+          PY
+          git push --force origin HEAD:main
