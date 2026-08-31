@@ -34,7 +34,7 @@ jobs:
               f.write(f'literal:{short}==>system\n')
           PY
           git filter-repo --force --replace-text /tmp/replacements.txt --replace-message /tmp/replacements.txt
-      - name: Verify and force push
+      - name: Verify rewritten history
         shell: bash
         run: |
           python - <<'PY'
@@ -43,8 +43,7 @@ jobs:
           commits = subprocess.check_output(['git','rev-list','--all'], text=True).splitlines()
           for commit in commits:
               msg = subprocess.check_output(['git','show','-s','--format=%B',commit], text=True)
-              low = msg.lower()
-              if any(t.lower() in low for t in terms):
+              if any(t.lower() in msg.lower() for t in terms):
                   raise SystemExit('Forbidden term remains in commit message')
           objs = subprocess.check_output(['git','rev-list','--objects','--all'], text=True).splitlines()
           for row in objs:
@@ -54,5 +53,12 @@ jobs:
               data = subprocess.check_output(['git','cat-file','blob',oid]).lower()
               if any(t.lower().encode() in data for t in terms):
                   raise SystemExit('Forbidden term remains in reachable blob')
+          print('Rewritten reachable history verified clean')
           PY
+      - name: Restore origin and force push sanitized main
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push --force origin HEAD:main
