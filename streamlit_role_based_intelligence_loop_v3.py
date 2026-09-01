@@ -67,6 +67,21 @@ LEARNINGS = pd.DataFrame([
     ["Home rail", "Recently Viewed", "20.9% click-to-purchase", "Current observation", "Strong continuity signal"],
 ], columns=["knowledge_area", "signal", "result", "evidence_state", "next_status"])
 
+OWNERSHIP = pd.DataFrame([
+    ["1. Business objective", "Jane / Business Lead", "Marketing leadership, Product, Sales/GTM", "Human owns the decision, customer context, constraints, and success criteria"],
+    ["2. Trusted evidence layer", "Analytics Engineering / Data Engineering", "Jane, Marketing Ops, CRM owners", "Engineering owns durable pipelines; Jane co-owns business definitions, grain, reconciliation, and validation"],
+    ["3. Signal detection", "AI Agent", "Jane", "AI monitors anomalies and patterns; signals remain observations until interpreted"],
+    ["4. Customer + journey interpretation", "Jane", "Research, Marketing, Product, AI Agent", "Human judgment connects behavior to likely customer state, intent, and friction"],
+    ["5. Diagnosis", "Jane + AI Agent", "Domain stakeholders", "AI broadens competing explanations; Jane applies business context and removes implausible diagnoses"],
+    ["6. Hypothesis ranking", "Jane + AI Agent", "Data Science / functional experts", "AI increases hypothesis throughput; Jane owns evidence standards and inference boundaries"],
+    ["7. Continuous exploration", "AI Agent", "Jane", "AI scales repetitive cuts across segment, channel, geo, device, campaign, and journey stage"],
+    ["8. Experimentation + validation", "Jane / Analytics", "Data Science, Product, Marketing, Engineering", "Humans own causal claims, statistical rigor, instrumentation validity, and test design"],
+    ["9. Recommendation + prioritization", "Jane", "Business leaders / decision owner", "Analytics converts evidence into a prioritized decision with confidence and trade-offs"],
+    ["10. Activation", "Business / Functional Owner", "Jane, Product, Marketing, Engineering, Agency", "The accountable function owns execution; analytics supports the decision and learning plan"],
+    ["11. Outcome measurement", "Jane / Analytics", "Data Engineering, business owner", "Analytics defines primary, leading, and guardrail measures tied to the original objective"],
+    ["12. Learning + re-check", "Jane + AI Agent", "Broader analytics organization", "Validated learning is stored with context and re-tested as new evidence arrives"],
+], columns=["loop_stage", "primary_owner", "key_collaborators", "ownership_boundary"])
+
 ROLE_VIEW = {
     "Executive": {
         "question": "Where is the biggest credible growth opportunity, and what decision should leadership make next?",
@@ -112,14 +127,20 @@ st.sidebar.markdown("**Evidence states**")
 st.sidebar.caption("Observed | Inferred | Unknown | Recommended | Validated / Rejected")
 st.sidebar.markdown("**V3 principle**")
 st.sidebar.caption("Same evidence layer. Different decision interface.")
+st.sidebar.markdown("**Ownership principle**")
+st.sidebar.caption("AI finds possibilities. Engineering creates trusted infrastructure. Analytics determines meaning. Business owners act.")
 
 st.header(role)
 st.write(view["question"])
 
+with st.expander("Who owns what in the intelligence loop", expanded=True):
+    st.dataframe(OWNERSHIP, use_container_width=True, hide_index=True)
+    st.caption("Ownership is intentionally shared: no single actor owns the full loop. The handoff is part of the design, not a gap.")
+
 # 1 Objective
 st.subheader("1. Business objective")
 objective = st.text_area("Decision to support", value=view["question"], height=70)
-st.caption("Jane / human: define the business decision, customer context, constraints, and what success means. AI may decompose the problem, but cannot invent the objective.")
+st.caption("Owner: Jane / Business Lead. Define the business decision, customer context, constraints, and what success means. AI may decompose the problem, but cannot invent the objective.")
 
 # 2 Shared evidence
 st.subheader("2. Shared trusted evidence layer")
@@ -136,19 +157,20 @@ with t3:
     st.caption("Current working evidence; descriptive unless an experiment is available.")
 with t4:
     st.dataframe(LEARNINGS, use_container_width=True, hide_index=True)
+st.caption("Owner: Analytics Engineering / Data Engineering for durable pipelines; Jane / Analytics co-owns business definitions, grain, reconciliation, and validation. Single source of truth means one governed metric definition, not necessarily one source system.")
 
 # 3 Signal monitoring
 st.subheader("3. AI signal monitoring")
 for item in view["focus"]:
     st.write(f"- {item}")
 st.info(view["default_signal"])
-st.caption("Boundary: a signal is an observation. The agent cannot jump directly from movement to a recommendation.")
+st.caption("Owner: AI Agent, reviewed by Jane. Boundary: a signal is an observation. The agent cannot jump directly from movement to a recommendation.")
 
 # 4 Journey interpretation
 st.subheader("4. Customer + journey interpretation")
 st.write("The agent maps signals to likely journey state, customer segment, and touchpoint role, then asks: what is the customer trying to do next, and what is blocking progression?")
 journey_stage = st.selectbox("Likely journey stage", JOURNEY["stage"].tolist())
-st.caption("Jane / human: challenge the inferred journey state with VOC, research, segmentation, and business context.")
+st.caption("Owner: Jane. Collaborators: Research, Marketing, Product, AI Agent. Human judgment challenges inferred journey state using VOC, research, segmentation, and business context.")
 
 # 5 Diagnosis
 st.subheader("5. Diagnosis")
@@ -162,7 +184,7 @@ diag_options = [
     "Measurement or data-quality issue",
 ]
 selected_diag = st.multiselect("Candidate diagnostic areas", diag_options, default=diag_options[:3])
-st.caption("The agent should search for competing explanations, not protect its first hypothesis.")
+st.caption("Owner: Jane + AI Agent. AI should search for competing explanations, not protect its first hypothesis; Jane applies domain context and evidence standards.")
 
 # 6 Hypothesis layer
 st.subheader("6. Ranked hypotheses")
@@ -170,7 +192,7 @@ hypotheses = []
 for i, h in enumerate(selected_diag[:5], 1):
     hypotheses.append([i, h, "Needs evidence", "Medium" if i <= 2 else "Low"])
 st.dataframe(pd.DataFrame(hypotheses, columns=["rank", "hypothesis", "state", "confidence"]), use_container_width=True, hide_index=True)
-st.caption("Jane / human: remove implausible hypotheses, add missing context, and keep inference separate from fact.")
+st.caption("Owner: Jane + AI Agent. Collaborate with Data Science / functional experts when needed. Jane removes implausible hypotheses, adds missing context, and keeps inference separate from fact.")
 
 # 7 Continuous testing
 st.subheader("7. Continuous exploration + testing")
@@ -184,7 +206,7 @@ c1, c2, c3 = st.columns(3)
 c1.metric("Illustrative automated checks / day", checks)
 c2.metric("Deep human validations / month", "2-5")
 c3.metric("Evidence status", "Exploratory")
-st.caption("AI's advantage is hypothesis throughput. Human advantage is context, statistical rigor, causal judgment, and accountability.")
+st.caption("Owner: AI Agent for exploration throughput; Jane prioritizes and reviews. AI's advantage is hypothesis throughput. Human advantage is context, statistical rigor, causal judgment, and accountability.")
 
 # 8 Validation
 st.subheader("8. Experimentation + validation")
@@ -196,7 +218,7 @@ validation = st.selectbox("Best validation path", [
     "Instrumentation / data QA first",
 ])
 st.write(f"Selected validation path: **{validation}**")
-st.caption("Boundary: automated exploration may surface patterns, but humans own causal claims and experiment validity.")
+st.caption("Owner: Jane / Analytics. Collaborators: Data Science, Product, Marketing, Engineering. Automated exploration may surface patterns, but humans own causal claims, statistical rigor, instrumentation validity, and experiment design.")
 
 # 9 Recommendation
 st.subheader("9. Recommendation + prioritization")
@@ -205,11 +227,13 @@ col1, col2, col3 = st.columns(3)
 col1.metric("Confidence", "Medium")
 col2.metric("Action state", "Test before scale")
 col3.metric("Decision owner", role)
+st.caption("Owner: Jane for analytical recommendation and prioritization; the business decision owner remains accountable for the final decision.")
 
 # 10 Activation
 st.subheader("10. Activation")
 action = st.radio("Human decision", ["Approve test", "Request more evidence", "Reject", "Escalate cross-functionally"], horizontal=True)
 st.write(f"Decision: **{action}**")
+st.caption("Owner: Business / Functional Owner. Collaborators: Jane, Product, Marketing, Engineering, Agency. Analytics supports the decision and learning plan; the accountable function owns execution.")
 
 # 11 Outcome measurement
 st.subheader("11. Outcome measurement")
@@ -219,15 +243,17 @@ outcomes = pd.DataFrame([
     ["Guardrail", "CX / margin / data quality / long-term retention", "Prevents local optimization"],
 ], columns=["metric_type", "example", "rule"])
 st.dataframe(outcomes, use_container_width=True, hide_index=True)
+st.caption("Owner: Jane / Analytics for the measurement framework; Data Engineering supports reliable instrumentation and the business owner remains accountable for the outcome.")
 
 # 12 Learning loop
 st.subheader("12. Learning + re-check")
 learning_state = st.radio("What did the evidence show?", ["Not tested", "Validated", "Rejected", "Mixed / context dependent"], horizontal=True)
 st.write(f"Learning state: **{learning_state}**")
-st.caption("Validated findings are stored with segment, context, date, method, and confidence. The agent re-checks prior conclusions as new evidence arrives.")
+st.caption("Owner: Jane + AI Agent. Validated findings are stored with segment, context, date, method, and confidence. The agent re-checks prior conclusions as new evidence arrives.")
 
 st.divider()
 st.subheader("Closed loop")
 st.code("Objective -> Trusted Data -> Detect -> Interpret -> Diagnose -> Hypothesize -> Test -> Validate -> Recommend -> Act -> Measure -> Learn -> Detect again", language="text")
 st.markdown("**Core evidence boundary:** Observed -> Inferred -> Unknown -> Recommended -> Validated / Rejected")
-st.success("V3 differentiator: the same evidence layer supports different role-specific decisions without creating six separate versions of truth.")
+st.markdown("**Ownership loop:** Business -> Engineering -> AI -> Analyst -> Business -> Measure -> Learn")
+st.success("V3 differentiator: the same evidence layer supports different role-specific decisions without creating six separate versions of truth. Ownership is explicit at every stage so AI acceleration does not blur human accountability.")
