@@ -12,24 +12,24 @@ from pydantic import BaseModel, Field
 
 st.set_page_config(page_title="Marketing Intelligence Loop V4", layout="wide")
 st.title("Marketing Intelligence Loop V4")
-st.caption("Trusted evidence -> AI exploration -> human judgment -> test -> outcome -> learning -> re-check")
+st.caption("Human objective -> governed evidence -> AI monitoring -> exceptions -> prioritization -> diagnosis -> human validation -> decision -> activation -> outcome monitoring -> learning")
 
 ROLES = ["Executive", "CRM Leader", "Product Leader", "Integrated Marketing Leader", "Performance Marketing Leader", "Agency Partner"]
 ROLE_QUESTIONS = {
-    "Executive": "Where is the biggest credible growth opportunity, and what decision should leadership make next?",
-    "CRM Leader": "Which customer state needs a different lifecycle treatment, and what should we test next?",
-    "Product Leader": "Where is the digital journey breaking, and which experience change should we test?",
-    "Integrated Marketing Leader": "Are channels preserving customer intent across the journey, and where is the weakest handoff?",
-    "Performance Marketing Leader": "Which campaign or audience changes improve downstream value, not just clicks?",
-    "Agency Partner": "What proactive client recommendation is supported by evidence, and what should be tested before scaling?",
+    "Executive": "Which exceptions deserve leadership attention, what is the likely business impact, and what decision should leadership make next?",
+    "CRM Leader": "Which customer-state exceptions need a different lifecycle treatment, and what should we validate next?",
+    "Product Leader": "Which journey exceptions indicate meaningful experience friction, and which change should we validate?",
+    "Integrated Marketing Leader": "Which cross-channel exceptions suggest customer intent is being lost, and where is the weakest handoff?",
+    "Performance Marketing Leader": "Which campaign or audience exceptions materially affect downstream value, not just clicks?",
+    "Agency Partner": "Which exceptions deserve proactive client attention, and what should be validated before scaling?",
 }
 
-# Public/shareable demo rule: mask source-company and branded platform/product references.
+# Public/shareable demo rule: keep source-company and branded platform/product references generic.
 MASK_RULES = [
-    (r"\bthe company\b", "the company"),
-    (r"\bthe system\s*2\b", "the system"),
-    (r"\bthe system\b", "the system"),
-    (r"\bsystem\b", "system"),
+    (r"\bthe company\b", "the site"),
+    (r"\bthe system\s*2\b", "page"),
+    (r"\bthe system\b", "page"),
+    (r"\bsystem\b", "page"),
 ]
 
 
@@ -92,7 +92,7 @@ LEVERAGE = [
 CAMPAIGN = [
     {"channel": "Paid YouTube", "destination": "Featured Games Page", "growth_contribution_pct": 52, "state": "observed"},
     {"channel": "Paid TikTok", "destination": "Featured Games Page", "growth_contribution_pct": 43, "state": "observed"},
-    {"channel": "Paid YouTube", "destination": "System Product Page", "growth_contribution_pct": 65, "state": "observed"},
+    {"channel": "Paid YouTube", "destination": "Hardware Product Page", "growth_contribution_pct": 65, "state": "observed"},
     {"channel": "Paid TikTok", "destination": "Product Features Page", "growth_contribution_pct": 96, "state": "observed"},
     {"channel": "Loyalty email", "destination": "Rewards / Exclusives Page", "growth_contribution_pct": 88, "state": "observed"},
 ]
@@ -117,19 +117,26 @@ PRIOR_LEARNINGS = [
     {"finding": "PDP contextual/behavioral rails outperform generic popularity downstream", "state": "current descriptive evidence"},
 ]
 
-SYSTEM_PROMPT = """You are a marketing intelligence decision-support collaborator operating over a trusted evidence packet.
+SYSTEM_PROMPT = """You are a marketing intelligence decision-support collaborator operating over a governed evidence packet.
+
+Operating philosophy:
+Human defines objective -> governed evidence -> AI continuously monitors -> exception detection -> prioritization -> AI diagnosis/hypotheses -> human causal validation -> decision -> activation -> automated outcome monitoring -> learning.
+
 Rules:
 1. Never invent facts, metrics, research, experiment results, or causality.
-2. Treat deterministic evidence as the evidence boundary. Do not recalculate or silently change supplied metrics.
+2. Treat deterministic governed evidence as the evidence boundary. Do not recalculate or silently change supplied metrics.
 3. Keep OBSERVED, INFERRED, UNKNOWN, and RECOMMENDED separate.
 4. Historical scenarios are precedent, not current forecasts.
 5. Descriptive/observational differences are not causal lift.
-6. Diagnose before recommending. Generate competing hypotheses rather than one confident story.
-7. Segment and journey context matter; channels are roles in a customer journey, not isolated silos.
-8. Recommend the smallest next analysis or experiment that could change the decision.
-9. AI expands exploration and hypothesis throughput; humans own business objectives, statistical validity, causal claims, customer/brand trade-offs, and final decisions.
-10. Protect customer trust and do not infer sensitive traits.
-11. Preserve anonymization. Never name the source company or branded console/platform/product names. Refer to them generically as the company, the site, the system, the product, a product page, a campaign landing page, or another generic experience label.
+6. Do not make humans manually monitor every launch, campaign, segment, or market. Detect and prioritize the exceptions most deserving of human attention.
+7. Prioritize exceptions by business impact, customer impact, confidence, urgency, and actionability.
+8. Diagnose before recommending. Generate competing hypotheses rather than one confident story.
+9. Segment and journey context matter; channels are roles in a customer journey, not isolated silos.
+10. Recommend the smallest next analysis or experiment that could change the decision.
+11. AI owns scalable monitoring, exception detection, prioritization, exploration, and hypothesis throughput. Humans own objectives, statistical validity, causal claims, customer/brand trade-offs, and final decisions.
+12. After activation, specify the primary outcome, leading indicator, guardrail, and monitoring window so outcomes can be checked automatically and fed back into learning.
+13. Protect customer trust and do not infer sensitive traits.
+14. Preserve anonymization. Never name the source brand, company, console, platform, or product. Refer to the source generically as the site or page.
 Return only the requested structured schema."""
 
 
@@ -140,6 +147,7 @@ def evidence_packet(role: str, objective: str, stage: str, human_context: str, f
         "objective": objective,
         "selected_journey_stage": stage,
         "human_context": human_context or "No additional context supplied.",
+        "operating_philosophy": "Human objective -> governed evidence -> AI monitoring -> exception detection -> prioritization -> AI diagnosis/hypotheses -> human causal validation -> decision -> activation -> automated outcome monitoring -> learning",
         "evidence": {
             "journey_historical": JOURNEY,
             "historical_leverage_scenarios": LEVERAGE,
@@ -160,7 +168,7 @@ def run_ai(packet: dict, api_key: str, model: str) -> DecisionSynthesis:
         model=model,
         input=[
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": "Analyze this trusted evidence packet for the selected role and decision.\n\n" + json.dumps(packet, indent=2)},
+            {"role": "user", "content": "Identify the highest-priority exception in this governed evidence packet, diagnose competing explanations, and recommend the smallest validation that could change the decision.\n\n" + json.dumps(packet, indent=2)},
         ],
         text_format=DecisionSynthesis,
     )
@@ -178,17 +186,19 @@ role = st.sidebar.selectbox("View as", ROLES)
 model = st.sidebar.text_input("OpenAI model", value=os.getenv("OPENAI_MODEL", "gpt-5.6"))
 api_key = st.sidebar.text_input("OpenAI API key", value=os.getenv("OPENAI_API_KEY", ""), type="password")
 st.sidebar.caption("For deployment, use a secret/environment variable rather than committing an API key.")
+st.sidebar.markdown("**Operating model**")
+st.sidebar.caption("AI monitors broadly; humans focus on prioritized exceptions and causal decisions.")
 st.sidebar.markdown("**Evidence boundary**")
 st.sidebar.caption("Observed -> Inferred -> Unknown -> Recommended -> Validated / Rejected")
 st.sidebar.markdown("**Anonymization**")
-st.sidebar.caption("Source-company and branded system/product references are masked in evidence packets and shareable output.")
+st.sidebar.caption("Source brand/company/platform/product references are generalized to site/page in shareable output.")
 
 st.header(role)
-objective = st.text_area("Business decision", value=ROLE_QUESTIONS[role], height=80)
+objective = st.text_area("Human-defined business objective", value=ROLE_QUESTIONS[role], height=80)
 stage = st.selectbox("Journey stage", [x["stage"] for x in JOURNEY])
-human_context = st.text_area("Jane / human context", placeholder="Add known campaign context, customer research, business constraints, recent product changes, or reasons an apparent pattern may be misleading.", height=100)
+human_context = st.text_area("Human context", placeholder="Add known campaign context, customer research, business constraints, recent changes, or reasons an apparent exception may be misleading.", height=100)
 
-st.subheader("1-2. Objective + trusted evidence")
+st.subheader("1-3. Objective -> governed evidence -> continuous monitoring")
 tabs = st.tabs(["Journey", "Campaign / channel", "Landing", "Recommendation rails", "Prior learning"])
 with tabs[0]:
     st.dataframe(pd.DataFrame(JOURNEY), use_container_width=True, hide_index=True)
@@ -206,19 +216,19 @@ packet = evidence_packet(role, objective, stage, human_context, st.session_state
 with st.expander("Inspect exact anonymized evidence packet sent to AI"):
     st.json(packet)
 
-if st.button("Run intelligence loop", type="primary"):
+if st.button("Run exception intelligence loop", type="primary"):
     if not api_key:
         st.error("Add OPENAI_API_KEY as an environment variable/secret or enter it in the sidebar for this session.")
     else:
         try:
-            with st.spinner("AI is diagnosing competing explanations against the trusted evidence..."):
+            with st.spinner("AI is monitoring the evidence, prioritizing exceptions, and diagnosing competing explanations..."):
                 st.session_state.analysis = run_ai(packet, api_key, model)
         except Exception as exc:
             st.error(f"AI synthesis failed: {exc}")
 
 analysis = st.session_state.analysis
 if analysis:
-    st.subheader("3-6. Detect -> interpret -> diagnose -> hypothesize")
+    st.subheader("4-6. Exception detection -> prioritization -> diagnosis")
     st.info(mask_text(analysis.executive_summary))
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -245,13 +255,13 @@ if analysis:
         })
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
-    st.subheader("7-8. Continuous exploration -> validation")
+    st.subheader("7. Human causal validation")
     for x in analysis.next_analyses:
         st.write(f"- {mask_text(x)}")
-    st.success(f"Recommended test: {mask_text(analysis.recommended_test)}")
-    st.caption("AI can screen many segment x channel x campaign x page x journey combinations; human analysts own statistical validity and causal interpretation.")
+    st.success(f"Recommended validation: {mask_text(analysis.recommended_test)}")
+    st.caption("AI can monitor and screen many launch x segment x channel x page x journey combinations; human analysts own statistical validity and causal interpretation.")
 
-    st.subheader("9-10. Recommendation -> human decision")
+    st.subheader("8-9. Decision -> activation")
     st.warning(mask_text(analysis.recommendation))
     a, b, c = st.columns(3)
     a.metric("AI confidence", analysis.confidence.upper())
@@ -259,20 +269,21 @@ if analysis:
     c.metric("Leading indicator", mask_text(analysis.leading_indicator))
     st.write(f"**Guardrail:** {mask_text(analysis.guardrail)}")
 
-    decision = st.radio("Jane / human decision", ["Need more evidence", "Approve test", "Challenge", "Reject"], horizontal=True)
+    decision = st.radio("Human decision", ["Need more evidence", "Approve test", "Activate", "Challenge", "Reject"], horizontal=True)
     feedback_note = st.text_input("Why? Add context the AI should learn from in the next cycle.")
     if st.button("Save human feedback"):
         st.session_state.feedback.append(mask_obj({"role": role, "objective": objective, "decision": decision, "note": feedback_note}))
         st.success("Anonymized feedback added to this session's next evidence packet.")
 
-    st.subheader("11-12. Measure -> learn -> re-check")
+    st.subheader("10-11. Automated outcome monitoring -> learning")
+    monitoring_window = st.text_input("Monitoring window", placeholder="e.g. 7 days, 4 weeks, or through launch + 14 days")
     outcome_state = st.selectbox("Outcome evidence", ["Not measured yet", "Validated", "Rejected", "Mixed / context dependent"])
     outcome_note = st.text_area("Outcome / experiment note", placeholder="Record actual result, segment, method, date, confidence, and important conditions.")
     if st.button("Add outcome to learning loop"):
-        st.session_state.feedback.append(mask_obj({"role": role, "objective": objective, "decision": "Outcome: " + outcome_state, "note": outcome_note}))
+        st.session_state.feedback.append(mask_obj({"role": role, "objective": objective, "decision": "Outcome: " + outcome_state, "monitoring_window": monitoring_window, "note": outcome_note}))
         st.success("Anonymized outcome added to session learning. Re-run the intelligence loop to let the next cycle see it.")
 
 st.divider()
-st.subheader("Closed learning loop")
-st.code("Trusted Data -> Detect -> Interpret -> Diagnose -> Hypothesize -> Test -> Human Validate -> Recommend -> Human Decide -> Act -> Measure -> Learn -> Re-check", language="text")
-st.caption("V4 principle: OpenAI is the exploration and synthesis layer, not the source of truth. Governed evidence and accountable human judgment remain the boundary.")
+st.subheader("Staff-scale decision system")
+st.code("Human Objective -> Governed Evidence -> AI Continuous Monitoring -> Exception Detection -> Prioritization -> AI Diagnosis/Hypotheses -> Human Causal Validation -> Decision -> Activation -> Automated Outcome Monitoring -> Learning", language="text")
+st.caption("At scale, analysts should design the measurement and decision system that monitors many launches and surfaces where human judgment is needed, rather than manually monitoring every launch.")
