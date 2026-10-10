@@ -18,6 +18,127 @@ Business objective + constraints → AI question-to-evidence translation → **A
 6. **Orchestration:** distinct read/recommend/draft/approved-write capabilities via connector/API/middleware. No production change without designated approval; the agent never replaces execution systems.
 7. **Closed-loop learning:** outcome metrics, experiment memory, approved evidence, decision rationale, calibration, unresolved questions, and knowledge freshness.
 
+## V2 foundations restored as first-class v3 architecture
+
+The v3 architecture **does not replace v2 with a journey dashboard**. The foundation is a governed, proactive, role-based business decision intelligence and orchestration system. Customer Journey Intelligence is a cross-cutting analytical capability of that system.
+
+### End-to-end architecture and feedback paths
+
+```text
+Role-based business experience / customer objectives / proactive exceptions
+                  |
+                  v
+AI Intelligence Engine (question-to-evidence contract; <=5 clarification questions;
+proactive business + process monitoring; cross-source, customer-first diagnosis)
+                  | governed read requests and factual evidence
+                  v
+FIRST-CLASS ANALYTICS-OWNED SEMANTIC LAYER
+  canonical metric/dimension dictionary, grain, customer/identity/journey states,
+  approved joins, attribution/comparison rules, benchmarks, lineage,
+  freshness, permissions and deterministic analytical/query capabilities
+                  | authorized read boundary (never unrestricted business SQL)
+                  v
+Existing systems: warehouse, web/app, CRM/CDP, commerce, MAP/email, media,
+experimentation, support/VOC (remain systems of record)
+                  |
+                  v
+Intelligence Engine synthesizes VERIFIED OBSERVATIONS vs INFERENCES vs UNKNOWNS
+                  |
+                  v
+HYPOTHESIS INTELLIGENCE -> competing explanations -> evidence for/against
+-> small list of 2-3 ranked hypotheses with confidence and uncertainties
+                  |
+                  v
+SMALL-LIST TESTING -> 1-3 decision-changing validation/experiment options
+-> smallest useful analysis or customer-facing test, primary metric,
+leading indicators, guardrails, comparison/holdout, stopping/decision rules
+                  |
+                  v
+Analytics methodology/evidence validation + Business/CX priority/approval
+                  |
+                  v
+BIDIRECTIONAL ORCHESTRATION + HEALTH (separate permissioned boundary)
+  outbound: read -> recommend -> draft -> human-approved execute
+  outbound: signals, test plans, audiences, draft actions, approvals
+  inbound: acceptance/IDs, configuration, execution status, delivery and
+  tracking integrity, operational/process health, exposure, customer outcomes
+                  |                      ^
+                  v                      |
+Existing campaign/CRM/CDP/MAP/ads/experiment tools (execution remains there)
+                  |
+                  v
+OUTCOME + DECISION MEMORY -> causal validation, customer outcomes,
+operational integrity, action status, validated and unresolved learnings
+                  |
+                  +----> governed evidence and future monitoring/diagnosis
+                  +----> next hypothesis ranking and test prioritization
+
+GOLDEN INSIGHTS & AI HEALTH: INDEPENDENT, CROSS-CUTTING evaluation of
+signal selection, evidence use, competing hypotheses, test quality,
+action/operational integrity, outcome claims, regression and autonomy gates.
+It inspects every stage, not only after an action or as a dashboard QA card.
+```
+
+### A. Semantic Layer — first-class governed facts and analytical capabilities
+
+The **Semantic Layer is an independent foundational service**, not a small Analytics Control Center feature. Analytics owns and versions its definitions; the agent uses them, but cannot invent or silently redefine canonical facts.
+
+- **Business metric dictionary:** exact KPI formulas, numerator/denominator, identity, grain (customer, journey, category, campaign, product, channel, session), dimensions, eligible population and canonical benchmarks.
+- **Customer/journey semantics:** customer × brand and customer × category state; explainable stage and cohort definitions, migration/transition and customer need signals, identity uncertainty.
+- **Cross-system relationships:** approved joins, keys, campaign/audience/experiment mappings, attribution and comparison rules.
+- **Governed capability/query catalog:** deterministic calculations, approved segmentation, cohort/path analyses and valid experiment retrieval, with documented parameters and allowed roles. AI may select capabilities through an authorized service, not access unrestricted SQL.
+- **Reliability contract:** freshness, completeness, instrumentation, lineage, quality flags, consent, privacy, policies and limitations returned with every answer.
+- **Approval and change control:** new metrics, methods, sources and identity rules require Analytics validation, publication, versioning and regression checks.
+
+**Separate semantics from knowledge:** the Semantic Layer establishes how the business reliably *defines, joins and measures* facts; the Knowledge and Decision Memory layer stores *what previous investigations and experiments suggested or validated*, with context and expiry/revalidation rules.
+
+### B. AI Intelligence — two initiation paths, one governed engine
+
+- **Business-initiated:** objectives, customer questions, constraints and a small question budget (usually 2–3, absolute max 5), then evidence-aware plan and actual approved investigation if connected.
+- **AI-initiated:** continuous monitoring detects important customer, business, automation and process gaps, prioritizing decision-impacting exceptions rather than flooding users with anomalies.
+- **Cross-system diagnosis:** investigate competing explanations using approved semantic evidence; separate observed, inferred, hypothesized and validated statements. Do not assume a customer outcome is caused by the channel recording the conversion.
+- **Role-based decision views:** Executive, CRM, Product, Integrated Marketing, Performance Marketing, Agency and Analyst/Admin consume the same governed intelligence at different levels of depth and within permissions.
+
+### C. Hypothesis Intelligence and Small-List Testing — explicit engines
+
+1. **Generate broadly:** multiple plausible, potentially contradictory explanations, including measurement/process failures and customer-experience causes.
+2. **Narrow intentionally:** present typically **2–3 ranked hypotheses**, each with supporting/contradicting evidence, remaining unknowns, confidence, customer impact, testability, reversibility and estimated business importance. No fabricated evidence or impact estimates.
+3. **Propose a short test list:** typically **1–3** evidence-discriminating options; the smallest useful next step may be read-only analytical validation rather than customer-facing action.
+4. **Separate questions:** hypothesis validation asks whether an explanation is credible; intervention experiments ask whether a change *causally* improves the desired outcome.
+5. **Make tests decision-ready:** eligible audience, treatment/control or comparison, outcome and guardrail definitions, readiness/power caveats, stop/decision rules and what decision changes with each result. Analytics validates methods, Business approves prioritization/activation.
+
+### D. Bidirectional Orchestration and Operational Health — continuous, not a one-way send
+
+Orchestration is a separate service boundary above existing execution tools, connected through native connectors, APIs, webhooks or workflow middleware. It **does not replace** existing CRM, CDP, MAP/email, media, web/product or experimentation tools.
+
+- **Outbound:** authorized insight signals; suggested tests and drafts; scoped targets; human approval record; idempotent execution request with target system, object, risk level, reason/evidence ID and rollback requirements.
+- **Inbound acknowledgement:** actual system execution IDs, destination configuration, audience and experiment assignment state, accepted/rejected requests, partial failures, retries and delivery status.
+- **Operational health:** freshness, suppression/consent, audience overlap, conflicting workflows, tracking integrity, exposure delivery, lead ownership/routing/SLA when applicable, process handoffs and experiment guardrails. Detect recommendations never executed, campaigns without benchmarks, tests launched without control, and actions with missing outcome tracking.
+- **Outcomes:** governed retrieval of downstream customer response and commercial outcomes, including treatment/control evidence where appropriate; no automatic causal attribution to a click or platform self-report.
+- **Health-driven escalation:** failed, unmeasurable or contradictory execution triggers appropriate alert/manual review or bounded rollback where authorized, not an unsupported success claim.
+- **Autonomy ladder:** Read -> Recommend -> Draft -> Human-approved Execute. Material sends, targeting, launch/pause, budget, routing and high-risk changes are approval-gated. Monitoring is not authorization to write.
+
+### E. Golden Insights & AI Health — independent evaluation and two learning loops
+
+**Golden Insights is a first-class, cross-cutting evaluation system**, not merely an Analytics UI card or a final summary of campaign results.
+
+- **Insight quality:** did the agent prioritize the right meaningful exception, grounded in customer/business context?
+- **Hypothesis quality:** were alternatives considered and evidence for/against reported faithfully, with meaningful confidence and unknowns?
+- **Small-test quality:** was the smallest discriminating test proposed with defensible metrics, controls, guardrails and decision criteria?
+- **Execution/health quality:** did requests observe permissions, reach the correct destination, execute as intended and report operational problems?
+- **Outcome/learning quality:** are incrementality and experience claims supported, are negative/null findings retained, and do lessons represent conditional precedent rather than permanent truth?
+- **Independent gates:** golden-question/golden-insight suites, deterministic checks, adversarial and regression evaluations, observability/audit trails, and approval gates before promoting metrics, evidence, new tools or greater autonomy.
+
+Maintain **two distinct loops**:
+1. **Business/customer outcome loop:** signal -> test/action -> operational telemetry -> customer outcomes and guardrails -> validated effect -> business decision.
+2. **Agent intelligence quality loop:** evidence selection -> hypothesis/test quality -> execution correctness -> Golden Insights evaluations -> error analysis/QA -> approved changes to prompts, capability definitions and evaluation criteria.
+
+A test with no positive uplift can still be an excellent test and good agent behavior; positive business results do not establish sound agent reasoning. Persist an **Experiment & Decision Memory** entry linking original goal/signal, semantics version, evidence, hypotheses, alternatives, approved test, execution-system IDs, health telemetry, measured outcome, limits, owner and reviewed learning. No unchecked self-modification of canonical facts or autonomy.
+
+### F. V3 customer intelligence as an extension of the foundation
+
+Customer Journey Intelligence enriches the intelligence and hypothesis engines with customer × brand/category stages, cross-touchpoint customer needs and journey friction, segmentation and migration, VOC and customer problems, priorities and experiment outcomes. It must not narrow the whole system to web analytics or become a replacement for role-based decision intelligence, semantic services, small-list testing, orchestration or Golden Insights.
+
 ## v3 customer journey extensions
 
 - **Customer intelligence home:** customer × brand and customer × category journeys, awareness → interest → consideration → purchase → retention, stage-specific next customer action, customer-first prioritized exceptions.
