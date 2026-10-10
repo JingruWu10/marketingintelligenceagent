@@ -63,3 +63,18 @@ When the underlying data are critically unreliable, block affected conclusions; 
 ## Relationship to previous implementation
 
 The existing Python prototype and Streamlit versions are kept unchanged. The v3 UI is an additional presentation layer; future backend integration should adapt existing deterministic and structured-AI components rather than fork a competing analytical engine.
+
+## Five-question interaction budget (v3 requirement)
+
+For each customer/business investigation, the agent may ask **at most five user-facing clarification questions total** (not five per subtopic). Aim for **two or three** and **stop sooner** as soon as an actionable evidence contract can be created. Questions must be decision-changing, concise, and one at a time; avoid splitting the same decision into several repetitive questions. Never ask users to provide facts that can be obtained from sources they are authorized to query.
+
+1. **Reuse context first:** count and carry forward earlier answers in the same investigation. Do not restart the budget after switching screens, roles, or threads that preserve the investigation.
+2. **Gate each question:** ask only when its answer would materially change the target population, customer outcome, evidence needed, decision rule, or experimental design. Otherwise use an explicit provisional assumption (with uncertainty and rationale).
+3. **Early exit:** after two or three answers, present the draft analytical plan once it is useful. Provide an optional 'Analyze now' path even before the budget is used.
+4. **Hard stop at five:** no sixth intake question. Deliver an evidence-aware decision brief: business objective, customer outcome, eligible cohort, primary/secondary KPIs and guardrails, comparisons, likely explanations as *hypotheses*, next governed data checks, feasible incrementality design, assumptions, and unresolved blockers.
+5. **Availability and safety:** do not claim to have queried data that is unavailable; if authorized sources exist, perform permitted read-only exploration. Lack of permission or critical data quality blocks source-dependent conclusions rather than eliciting endless questions. Production write actions still require human approval.
+6. **Follow-up is user-led:** users may voluntarily provide more context after the brief; the agent can continue analysis, but must not autonomously start another questionnaire to evade the cap.
+
+**Example: email retention** — Given 'improve email CTR' → 'strengthen customer retention' → 'active existing customers' → 'personalized ongoing value' → 'repeat product purchase', there is already enough to draft an investigation. Do not ask for purchase cadence: calculate historical repurchase windows by cohort and category using approved sources, or label that analysis pending. Click rate is a supporting diagnostic; incremental repeat-purchase rate may be a candidate primary KPI, subject to Analytics approval. Compare a randomized email treatment vs holdout if ethical, feasible and properly powered; protect unsubscribe, complaint, fatigue and customer-experience guardrails. No conversion or causal impact is presumed without data.
+
+**Implementation note:** The static browser prototype demonstrates a front-end question counter and sample guided flow. A future service must enforce this budget server-side on persisted investigation state, not by trusting a client-side counter.
